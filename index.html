@@ -660,7 +660,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
   if (synth) { chargerVoix(); if ('onvoiceschanged' in synth) synth.addEventListener('voiceschanged', chargerVoix); }
 
   /* ---------- Écran toujours allumé ---------- */
-  let verrou = null, etatEcran = 'attente';
+  let verrou = null, etatEcran = 'attente', demandeEnCours = false;
   const video = $('#eveil');
   function majEcran() {
     const el = $('#etat-ecran');
@@ -671,16 +671,22 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
   async function garderEcran() {
     if (document.visibilityState !== 'visible') return;
     if (verrou && !verrou.released) return;
-    if (etatEcran === 'secours' && !video.paused) return;
+    if (demandeEnCours) return;
+    // La vraie méthode (verrou d'écran) est retentée à chaque appui tant qu'elle n'est pas obtenue :
+    // iOS ne l'accorde qu'après un geste de l'utilisateur.
     if ('wakeLock' in navigator) {
+      demandeEnCours = true;
       try {
         verrou = await navigator.wakeLock.request('screen');
         etatEcran = 'actif'; majEcran();
+        if (!video.paused) video.pause();
         verrou.addEventListener('release', () => { verrou = null; if (etatEcran === 'actif') etatEcran = 'attente'; majEcran(); });
+        demandeEnCours = false;
         return;
       } catch (e) {}
+      demandeEnCours = false;
     }
-    try { await video.play(); etatEcran = 'secours'; } catch (e) { etatEcran = 'refuse'; }
+    if (video.paused) { try { await video.play(); etatEcran = 'secours'; } catch (e) { etatEcran = 'refuse'; } }
     majEcran();
   }
 
@@ -694,6 +700,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
     if (synth) { try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; synth.speak(u); } catch (e) {} }
   }
   document.addEventListener('pointerdown', auPremierAppui, { passive: true });
+  ['click', 'touchend'].forEach((ev) => document.addEventListener(ev, () => garderEcran(), { passive: true }));
   document.addEventListener('keydown', auPremierAppui);
 
   /* ---------- Minuteur ---------- */
