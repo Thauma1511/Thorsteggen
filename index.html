@@ -485,13 +485,6 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
           <div class="liste-voix" id="liste-voix" role="radiogroup" aria-label="Voix de l'iPhone"></div>
         </div>
         <div class="ligne pile">
-          <span class="ligne-titre">Musique pendant les annonces</span>
-          <div class="segment" id="seg-musique" role="radiogroup" aria-label="Musique pendant les annonces">
-            <button type="button" role="radio" data-v="baisser">La baisser</button>
-            <button type="button" role="radio" data-v="garder">Garder le volume</button>
-          </div>
-        </div>
-        <div class="ligne pile">
           <label class="ligne-titre" for="vol">Volume des signaux</label>
           <input class="curseur" id="vol" type="range" min="10" max="100" step="5" value="80">
         </div>
@@ -499,7 +492,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
           <button class="secondaire" id="btn-tester" type="button">Écouter les signaux</button>
         </div>
       </div>
-      <p class="note">Sur iPhone, coupez le mode silencieux pendant la séance : iOS coupe les sons des pages web en silencieux. La voix peut baisser un court instant la musique, même avec « Garder le volume ».</p>
+      <p class="note">Sur iPhone, coupez le mode silencieux pendant la séance : iOS coupe les sons des pages web en silencieux. Les sons se jouent par-dessus la musique sans la couper. Quand la voix parle, iOS baisse la musique un court instant.</p>
       <p class="note">Pour une voix plus naturelle : Réglages de l'iPhone › Accessibilité › Contenu énoncé › Voix › Français, puis téléchargez une voix « améliorée ». Elle apparaît dans la liste ci-dessus si iOS la rend disponible aux pages web.</p>
     </section>
 
@@ -556,22 +549,40 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
   const dureeChoisie = () => R.durees[Math.min(Math.max(R.choix, 0), 4)];
 
   /* ---------- Son : petites cloches douces en Web Audio ---------- */
-  let ctx = null, sortie = null, tSession = null;
+  let ctx = null, sortie = null;
   const typeSession = (t) => { try { if (navigator.audioSession) navigator.audioSession.type = t; } catch (e) {} };
+  function creerContexte() {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    typeSession('ambient');
+    ctx = new AC();
+    sortie = ctx.createGain();
+    sortie.gain.value = R.volume / 100;
+    const filtre = ctx.createBiquadFilter();
+    filtre.type = 'lowpass'; filtre.frequency.value = 5200; filtre.Q.value = 0.4;
+    sortie.connect(filtre); filtre.connect(ctx.destination);
+    return ctx;
+  }
   function audio() {
-    if (!ctx) {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (!AC) return null;
-      typeSession('ambient');
-      ctx = new AC();
-      sortie = ctx.createGain();
-      sortie.gain.value = R.volume / 100;
-      const filtre = ctx.createBiquadFilter();
-      filtre.type = 'lowpass'; filtre.frequency.value = 5200; filtre.Q.value = 0.4;
-      sortie.connect(filtre); filtre.connect(ctx.destination);
-    }
+    if (!ctx && !creerContexte()) return null;
     if (ctx.state !== 'running') ctx.resume().catch(() => {});
     return ctx;
+  }
+  // Appelé pendant un geste : si iOS a interrompu le son (autre app, Deezer…), on repart sur un moteur neuf.
+  function reveillerAudio() {
+    if (!ctx) { creerContexte(); return; }
+    if (ctx.state === 'running') return;
+    const ancien = ctx; ctx = null;
+    try { ancien.close(); } catch (e) {}
+    creerContexte();
+    if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {});
+  }
+  // Joue un son tout de suite, ou pas du tout : jamais en retard ni empilé avec d'autres.
+  function jouer(dessiner) {
+    if (!audio()) return;
+    if (ctx.state === 'running') { dessiner(ctx.currentTime); return; }
+    const depart = performance.now();
+    ctx.resume().then(() => { if (ctx && ctx.state === 'running' && performance.now() - depart < 500) dessiner(ctx.currentTime); }).catch(() => {});
   }
   function note(f, t0, duree, gain) {
     const o = ctx.createOscillator(), g = ctx.createGain();
@@ -582,16 +593,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
     o.connect(g); g.connect(sortie); o.start(t0); o.stop(t0 + duree + 0.05);
   }
   function cloche(f, t0, duree, gain) { note(f, t0, duree, gain); note(f * 2, t0, duree * 0.55, gain * 0.22); note(f * 3.01, t0, duree * 0.3, gain * 0.06); }
-  function avantSignal(duree) {
-    typeSession(R.musique === 'baisser' ? 'transient' : 'ambient');
-    clearTimeout(tSession);
-    tSession = setTimeout(() => typeSession('ambient'), duree);
-  }
   const sons = {
-    repos() { if (!audio()) return; avantSignal(2600); const t = ctx.currentTime + 0.03; cloche(659.25, t, 1.3, 0.2); cloche(493.88, t + 0.18, 1.8, 0.2); },
-    alerte() { if (!audio()) return; avantSignal(3200); const t = ctx.currentTime + 0.03; cloche(880, t, 1.7, 0.22); cloche(1318.5, t + 0.14, 1.5, 0.1); },
-    tic() { if (!audio()) return; avantSignal(900); const t = ctx.currentTime + 0.01; note(1046.5, t, 0.16, 0.12); },
-    top() { if (!audio()) return; avantSignal(2600); const t = ctx.currentTime + 0.03; [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => cloche(f, t + i * 0.075, 1.25 - i * 0.1, 0.16)); }
+    repos() { jouer((n) => { const t = n + 0.03; cloche(659.25, t, 1.3, 0.2); cloche(493.88, t + 0.18, 1.8, 0.2); }); },
+    alerte() { jouer((n) => { const t = n + 0.03; cloche(880, t, 1.7, 0.22); cloche(1318.5, t + 0.14, 1.5, 0.1); }); },
+    tic() { jouer((n) => { note(1046.5, n + 0.01, 0.16, 0.12); }); },
+    top() { jouer((n) => { const t = n + 0.03; [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => cloche(f, t + i * 0.075, 1.25 - i * 0.1, 0.16)); }); }
   };
 
   /* ---------- Voix ---------- */
@@ -694,9 +700,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
   let deverrouille = false;
   function auPremierAppui() {
     garderEcran();
-    if (deverrouille) { if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {}); return; }
+    reveillerAudio();
+    if (deverrouille) return;
     deverrouille = true;
-    audio();
     if (synth) { try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; synth.speak(u); } catch (e) {} }
   }
   document.addEventListener('pointerdown', auPremierAppui, { passive: true });
@@ -946,7 +952,6 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
     });
     segment('#seg-alerte', R.alerte, (v) => { R.alerte = +v; sauver(); });
     segment('#seg-voix', R.voix, (v) => { R.voix = v; sauver(); majInfoVoix(); rendreListeVoix(); });
-    segment('#seg-musique', R.musique, (v) => { R.musique = v; sauver(); });
     segment('#seg-affichage', R.affichage, (v) => { R.affichage = v; sauver(); if (S.etat === 'effort') { afficherEffort(); morph(); } });
     const sw = $('#sw-tics'); sw.setAttribute('aria-checked', String(!!R.tics));
     sw.onclick = () => { R.tics = !R.tics; sauver(); sw.setAttribute('aria-checked', String(R.tics)); };
