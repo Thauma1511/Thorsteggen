@@ -112,7 +112,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
 
 .anneau{position:relative;width:var(--R);max-width:100%;aspect-ratio:1/1;flex:none;padding:0;border:0;border-radius:50%;background:transparent;color:inherit;cursor:pointer;
   -webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-user-select:none;user-select:none}
-.anneau::before{content:"";position:absolute;inset:-18%;border-radius:50%;background:radial-gradient(circle,var(--halo) 0%,rgba(0,0,0,0) 62%);pointer-events:none;transition:transform .5s var(--douceur)}
+.anneau::before{content:"";position:absolute;inset:-18%;border-radius:50%;background:radial-gradient(circle,var(--halo) 0%,rgba(0,0,0,0) 62%);pointer-events:none;transition:transform .5s var(--douceur),opacity .9s ease}
 .anneau svg{position:relative;display:block;width:100%;height:100%;overflow:visible;transform:scale(1);transition:transform .6s var(--ressort)}
 .anneau.presse svg{transform:scale(.94);transition:transform .12s ease-out}
 .anneau.presse::before{transform:scale(1.06)}
@@ -156,6 +156,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
 @keyframes topIn{0%{opacity:0;transform:scale(.55)}45%{opacity:1;transform:scale(1.12)}100%{transform:scale(1)}}
 @keyframes refletTexte{0%{background-position:100% 0}100%{background-position:0 0}}
 :root.intro #app,:root.intro .fonds{visibility:hidden}
+/* Réplique exacte de l'image de lancement iOS : même place, même taille, pour un enchaînement sans saut */
+.depart{display:none;position:fixed;z-index:30;left:50%;top:50%;width:calc(min(100vw,100vh) * .46 * 1180 / 1140);aspect-ratio:1/1;transform:translate(-50%,-50%);pointer-events:none}
+.depart svg{display:block;width:100%;height:100%}
+:root.intro.autonome .depart{display:block}
+.anneau.sans-halo::before{opacity:0}
 .sous{margin:0;font-size:14px;letter-spacing:.02em;color:var(--argent-sourd);min-height:1.45em;font-variant-numeric:tabular-nums;white-space:nowrap}
 
 /* ---------- Commandes ---------- */
@@ -352,7 +357,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
 <body>
 
 
-<script>try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('intro')}catch(e){}</script>
+<script>try{var R_=document.documentElement;if(navigator.standalone===true||matchMedia('(display-mode: standalone)').matches)R_.classList.add('autonome');if(!matchMedia('(prefers-reduced-motion: reduce)').matches)R_.classList.add('intro')}catch(e){}</script>
+<div class="depart" id="depart"><svg viewBox="32 30 1180 1180" aria-hidden="true"><defs><linearGradient id="g-depart" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#c9ccd2"/></linearGradient></defs><circle cx="622" cy="620" r="598" fill="none" stroke="rgba(236,235,231,.07)" stroke-width="2"/><circle cx="622" cy="620" r="540" fill="none" stroke="url(#g-depart)" stroke-width="58"/><g fill="#f3f2ee"><circle cx="622" cy="295" r="150"/><circle cx="333" cy="442" r="145"/><circle cx="911" cy="442" r="145"/><rect x="581.5" y="400" width="81" height="689"/><path d="M346 500 L447 500 L582.5 651 L582.5 763 Z"/><path d="M898 500 L797 500 L661.5 651 L661.5 763 Z"/></g></svg></div>
 <div class="fonds" aria-hidden="true">
   <div class="fond f-effort"></div>
   <div class="fond f-repos"></div>
@@ -991,13 +997,31 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
   /* ---------- Intro au lancement : le logo se dessine au centre, grossit, puis rejoint sa place ---------- */
   function intro() {
     if (!racine.classList.contains('intro')) return;
+    const autonome = racine.classList.contains('autonome');
     racine.classList.remove('intro');
     if (!btnAnneau.animate) return;
     try {
       const r = btnAnneau.getBoundingClientRect();
       const dx = innerWidth / 2 - (r.left + r.width / 2), dy = innerHeight / 2 - (r.top + r.height / 2);
-      const s0 = Math.min(innerWidth, innerHeight) * 0.46 / r.width;
       const ici = 'translate(' + dx + 'px,' + dy + 'px) ';
+      if (autonome) {
+        // Depuis l'icône : le logo part exactement de l'image de lancement, grossit, puis rejoint sa place
+        const s0 = Math.min(innerWidth, innerHeight) * 0.46 * 1180 / 1140 / r.width;
+        btnAnneau.classList.add('sans-halo');
+        btnAnneau.animate([
+          { transform: ici + 'scale(' + s0 + ')', easing: 'cubic-bezier(.4,0,.2,1)' },
+          { transform: ici + 'scale(' + (s0 * 1.08) + ')', offset: 0.32, easing: 'cubic-bezier(.3,1.2,.5,1)' },
+          { transform: 'none' }
+        ], { duration: 1150, fill: 'backwards' });
+        setTimeout(() => btnAnneau.classList.remove('sans-halo'), 700);
+        $('.fonds').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 900, delay: 200, easing: 'ease-out', fill: 'backwards' });
+        const els = ['.marque', '.tete-actions', '#etiquette', '#chiffres', '#sous', '#durees', '#btn-serie', '#btn-nouvel']
+          .map((sel) => $(sel)).filter((el) => el && el.offsetParent !== null);
+        els.forEach((el, i) => el.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }],
+          { duration: 500, delay: 700 + i * 60, easing: 'cubic-bezier(.22,.8,.22,1)', fill: 'backwards' }));
+        return;
+      }
+      const s0 = Math.min(innerWidth, innerHeight) * 0.46 / r.width;
       btnAnneau.animate([
         { transform: ici + 'scale(' + (s0 * 0.86) + ')', opacity: 0, easing: 'cubic-bezier(.2,.7,.2,1)' },
         { transform: ici + 'scale(' + s0 + ')', opacity: 1, offset: 0.32, easing: 'cubic-bezier(.4,0,.2,1)' },
