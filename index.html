@@ -167,7 +167,16 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
 .commandes{grid-area:commandes;display:grid;padding-top:10px}
 .c-effort,.c-repos{grid-area:1/1;transition:opacity .45s ease,transform .7s var(--ressort-doux),visibility 0s linear 0s}
 .c-effort{display:flex;flex-direction:column;gap:12px}
-.c-repos{display:flex;align-items:center;justify-content:center;gap:14px;align-self:center}
+.c-repos{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:14px;align-self:stretch;min-width:0}
+.c-repos-boutons{display:flex;align-items:center;justify-content:center;gap:14px}
+.citation{margin:0;max-width:34em;text-align:center;opacity:0;transform:translateY(8px);transition:opacity .9s ease .5s,transform .9s var(--douceur) .5s}
+.citation blockquote{margin:0;font-size:15px;font-weight:300;line-height:1.42;letter-spacing:.01em;color:#d9d9dc;text-wrap:balance}
+.citation blockquote::before{content:"« "}.citation blockquote::after{content:" »"}
+.citation figcaption{margin-top:6px;font-family:var(--f-marque);font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--argent-sourd);padding-left:.3em}
+:root[data-phase="repos"] .citation figcaption{color:#7fb69c}
+:root[data-phase="alerte"] .citation figcaption{color:#b99d6a}
+#app[data-etat="repos"] .citation.visible{opacity:1;transform:none}
+.citation:empty,.citation.vide{display:none}
 #app[data-etat="effort"] .c-repos,#app[data-etat="top"] .c-repos,
 #app[data-etat="repos"] .c-effort,#app[data-etat="top"] .c-effort{opacity:0;visibility:hidden;pointer-events:none;transform:translateY(14px);transition:opacity .25s ease,transform .25s ease,visibility 0s linear .25s}
 
@@ -240,7 +249,12 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
   .c-effort{gap:8px;width:min(100%,460px);justify-self:center}
   .principal{height:48px}
   #app[data-etat="effort"] .c-repos,#app[data-etat="top"] .c-repos,#app[data-etat="repos"] .c-effort,#app[data-etat="top"] .c-effort{display:none}
-  .c-repos{padding-bottom:4px}
+  .c-repos{padding-bottom:4px;gap:8px}
+  .citation blockquote{font-size:13px;line-height:1.35}
+  .citation figcaption{margin-top:3px}
+}
+@media (orientation:landscape) and (max-height:340px){
+  .citation{display:none}
   .rond{width:54px;height:54px}.passer{height:46px}
 }
 
@@ -429,9 +443,12 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
       </button>
     </div>
     <div class="c-repos">
+      <figure class="citation" id="citation" aria-live="polite"><blockquote id="citation-texte"></blockquote><figcaption id="citation-auteur"></figcaption></figure>
+      <div class="c-repos-boutons">
       <button class="rond" id="btn-moins" type="button" aria-label="Retirer 15 secondes">−15<small>s</small></button>
       <button class="passer" id="btn-passer" type="button">Passer le repos</button>
       <button class="rond" id="btn-plus" type="button" aria-label="Ajouter 15 secondes">+15<small>s</small></button>
+      </div>
     </div>
   </section>
 </main>
@@ -540,7 +557,7 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
 
   /* ---------- Réglages ---------- */
   const CLE = 'thorsteggen.reglages.v1';
-  const DEFAUT = { durees: [30, 60, 90, 120, 150], choix: 3, alerte: 10, tics: true, voix: 'feminine', voixURI: '', musique: 'baisser', volume: 80, affichage: 'chrono' };
+  const DEFAUT = { durees: [30, 60, 90, 120, 150], choix: 3, alerte: 10, tics: true, voix: 'aucune', voixURI: '', musique: 'baisser', volume: 80, affichage: 'serie' };
   let R = Object.assign({}, DEFAUT);
   try {
     const lu = JSON.parse(localStorage.getItem(CLE) || 'null');
@@ -776,6 +793,7 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
     elChiffres.classList.remove('arrete');
     ecrire(elChiffres, fmt(d)); morph();
     sons.repos(); setTimeout(() => { if (S.etat === 'repos') dire('Repos'); }, 260);
+    montrerCitation();
     boucle();
   }
 
@@ -790,6 +808,30 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
     if (largeur > dispo) elChiffres.style.fontSize = (parseFloat(getComputedStyle(elChiffres).fontSize) * dispo / largeur).toFixed(1) + 'px';
   }
   function effacerMessage() { elChiffres.style.height = ''; elChiffres.style.lineHeight = ''; elChiffres.style.fontSize = ''; }
+
+  /* ---------- Citations : tirage sans répétition tant que toutes n'ont pas été vues ---------- */
+  const CITATIONS = [["Je détestais chaque minute de l’entraînement, mais je me disais : “N’abandonne pas.”", "Muhammad Ali"], ["La discipline, c'est faire ce que tu détestes comme si tu adorais le faire.", "Mike Tyson"], ["La mentalité, le combat, l'effort, le sacrifice. Toujours vouloir davantage.", "Lionel Messi"], ["Je n'ai jamais baissé les bras.", "Karim Benzema"], ["Le travail acharné finit toujours par payer.", "Thierry Henry"], ["Continue d'avancer !", "Bruce Lee"], ["Mon chemin vers le succès ne s'est pas fait du jour au lendemain.", "Jackie Chan"], ["Rien ne tombe du ciel : il faut travailler dur pour l'obtenir.", "Max Verstappen"], ["Je n'abandonne jamais. Et je ne vais pas abandonner à cause de quelques difficultés.", "Fernando Alonso"], ["Aucun être humain n'est limité.", "Eliud Kipchoge"], ["Rêve aussi grand que tu le peux.", "Michael Phelps"], ["Il faut avoir le bon état d'esprit, être compétitif et prêt à tout donner.", "Samuel Eto'o"], ["Pas besoin d'être exceptionnel. Il faut être constant, déterminé et prêt à travailler. Pas de raccourci.", "Tom Brady"], ["C'est à moi de travailler, de devenir meilleur.", "Charles Leclerc"], ["Toujours chercher à devenir un meilleur pilote et un meilleur être humain.", "Carlos Sainz Jr."], ["Le plus important, c'est d'être patient et d'apprécier son parcours sportif.", "Allyson Felix"], ["J'y suis arrivée. Et si j'ai pu le faire, vous aussi.", "Coco Gauff"], ["Nous poursuivions tous un rêve.", "David Villa"], ["Ne considère jamais la victoire comme un dû. Continue simplement à travailler encore plus dur.", "Beyoncé"], ["N'aie jamais honte d'essayer.", "Taylor Swift"], ["Ne perds jamais de vue ce qui fait que tu es toi.", "Adele"], ["C'est de la recherche, c'est du travail, c'est de la persévérance et un peu de douleur, même.", "Stromae"], ["Tu peux échouer en faisant quelque chose que tu n'aimes pas. Alors autant tenter ta chance avec ce que tu aimes.", "Jim Carrey"], ["Ma peur de l'échec n'a jamais été aussi grande que ma peur de me demander ce qui se serait passé si je n'avais jamais essayé.", "Will Ferrell"], ["Ne laissez personne vous dire que votre heure est passée. N'abandonnez jamais.", "Michelle Yeoh"], ["Peu importe d'où vous venez, vos rêves ont de la valeur.", "Lupita Nyong'o"], ["Si vous êtes prêts à emprunter le chemin le plus difficile, vous ne le regretterez pas.", "Chadwick Boseman"], ["Si ce n'est pas moi, qui ? Si ce n'est pas maintenant, quand ?", "Emma Watson"], ["Nous ne changeons pas. Nous transformons le gravier et la coquille en perle.", "P!nk"], ["Je ne me souviens que des moments où j'ai essayé d'aller au-delà de ce dont je me croyais capable.", "Sandra Bullock"], ["Mon héros, c'est toujours celui que je serai dans dix ans.", "Matthew McConaughey"], ["Jamais un échec, toujours une leçon.", "Rihanna"], ["Pour commencer, il faut arrêter de parler et se mettre à agir.", "Walt Disney"], ["N'attends pas qu'on te dise que tu es prêt. Montre-le. Fais-le.", "Peter Dinklage"], ["Si j'avais connu mes propres limites, je n'aurais jamais pris ce risque.", "Natalie Portman"], ["Il faut croire en ses rêves. J'ai failli abandonner les miens. Gardez les vôtres vivants.", "Ke Huy Quan"], ["Il n'y a pas de normalité. Il n'y a que le changement, la résistance au changement, puis encore le changement.", "Meryl Streep"], ["Quand les choses deviennent difficiles, vas-tu abandonner ou persévérer sans relâche ?", "Jeff Bezos"], ["Les idées ne naissent pas entièrement formées. Elles deviennent plus claires à mesure qu'on travaille dessus. Il faut simplement commencer.", "Mark Zuckerberg"], ["Chaque matin, dis-toi que tu vas apprendre quelque chose aujourd'hui.", "Satya Nadella"], ["Ce qui compte, ce n'est pas la force de tes coups, mais ta capacité à encaisser et à continuer d'avancer.", "Rocky Balboa"], ["Nos doutes nous trahissent et nous privent de ce que nous pourrions gagner, par peur d'essayer.", "William Shakespeare (Lucio)"], ["La force ne vient pas des capacités physiques. Elle vient d'une volonté indomptable.", "Mahatma Gandhi"], ["La vie est soit une aventure audacieuse, soit rien.", "Helen Keller"], ["Comme il est merveilleux de pouvoir commencer dès maintenant à améliorer le monde, sans attendre un seul instant.", "Anne Frank"], ["Nous tombons. Nous échouons. Nous perdons notre chemin, souvent lorsque la peur nous gagne.", "Angelina Jolie"], ["Ne laissez pas la complexité vous arrêter.", "Bill Gates"], ["Il faut croire en soi pour être libre dans son jeu.", "Camille Cottin"], ["Je veux me remercier d'avoir cru en moi, d'avoir travaillé si dur et de n'avoir jamais abandonné.", "Snoop Dogg"], ["N'abandonne jamais. Ne te repose jamais sur tes acquis.", "Elton John"]];
+  const CLE_CIT = 'thorsteggen.citations.v1';
+  function prochaineCitation() {
+    let sac = null;
+    try { sac = JSON.parse(localStorage.getItem(CLE_CIT) || 'null'); } catch (e) {}
+    if (!sac || !Array.isArray(sac.ordre) || sac.ordre.length !== CITATIONS.length || sac.pos >= sac.ordre.length) {
+      const dernier = sac && Array.isArray(sac.ordre) ? sac.ordre[sac.ordre.length - 1] : -1;
+      const ordre = CITATIONS.map((_, i) => i);
+      for (let i = ordre.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [ordre[i], ordre[j]] = [ordre[j], ordre[i]]; }
+      if (ordre[0] === dernier && ordre.length > 1) [ordre[0], ordre[1]] = [ordre[1], ordre[0]];
+      sac = { ordre, pos: 0 };
+    }
+    const c = CITATIONS[sac.ordre[sac.pos]]; sac.pos += 1;
+    try { localStorage.setItem(CLE_CIT, JSON.stringify(sac)); } catch (e) {}
+    return c;
+  }
+  function montrerCitation() {
+    const [texte, auteur] = prochaineCitation();
+    const fig = $('#citation'); fig.classList.remove('visible');
+    $('#citation-texte').textContent = texte; $('#citation-auteur').textContent = auteur;
+    void fig.offsetWidth; fig.classList.add('visible');
+  }
 
   function finRepos(enRetard) {
     if (S.etat !== 'repos') return;
