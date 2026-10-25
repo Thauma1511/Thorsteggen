@@ -606,7 +606,21 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
     if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {});
   }
   // Joue un son tout de suite, ou pas du tout : jamais en retard ni empilé avec d'autres.
+  // Arrête et vide le moteur audio : tout son en attente est jeté, rien ne pourra partir en rafale plus tard
+  function couperAudio() {
+    if (ctx) { const ancien = ctx; ctx = null; sortie = null; try { ancien.close(); } catch (e) {} }
+    repereAudio = null;
+  }
+  // Sécurité : si l'horloge audio est figée alors que l'app est visible (iOS), on repart sur un moteur neuf
+  let repereAudio = null;
+  setInterval(() => {
+    if (!ctx || ctx.state !== 'running' || document.visibilityState !== 'visible') { repereAudio = null; return; }
+    const n = { ct: ctx.currentTime, pn: performance.now() };
+    if (repereAudio && n.pn - repereAudio.pn > 700 && (n.ct - repereAudio.ct) < (n.pn - repereAudio.pn) / 1000 * 0.4) { couperAudio(); return; }
+    repereAudio = n;
+  }, 500);
   function jouer(dessiner) {
+    if (document.visibilityState !== 'visible') return;
     if (!audio()) return;
     if (ctx.state === 'running') { dessiner(ctx.currentTime); return; }
     const depart = performance.now();
@@ -733,6 +747,7 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
     deverrouille = true;
     if (synth) { try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; synth.speak(u); } catch (e) {} }
   }
+  window.addEventListener('pagehide', () => { couperAudio(); if (synth) try { synth.cancel(); } catch (e) {} });
   document.addEventListener('pointerdown', auPremierAppui, { passive: true });
   ['click', 'touchend'].forEach((ev) => document.addEventListener(ev, () => garderEcran(), { passive: true }));
   document.addEventListener('keydown', auPremierAppui);
@@ -897,9 +912,10 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
   setInterval(tick, 250);
 
   document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') { couperAudio(); if (synth) try { synth.cancel(); } catch (e) {} return; }
     if (document.visibilityState === 'visible') {
       garderEcran();
-      if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {});
+      audio();
       tick(); if (S.etat === 'repos') boucle();
     }
   });
