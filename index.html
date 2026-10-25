@@ -748,7 +748,9 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
     if (synth) { try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; synth.speak(u); } catch (e) {} }
   }
   window.addEventListener('pagehide', () => { couperAudio(); if (synth) try { synth.cancel(); } catch (e) {} });
-  document.addEventListener('pointerdown', auPremierAppui, { passive: true });
+  // En phase de capture : le son est remis en route avant que le bouton touché ne joue le sien
+  document.addEventListener('pointerdown', auPremierAppui, { passive: true, capture: true });
+  ['touchend', 'click'].forEach((ev) => document.addEventListener(ev, () => { if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {}); }, { passive: true, capture: true }));
   ['click', 'touchend'].forEach((ev) => document.addEventListener(ev, () => garderEcran(), { passive: true }));
   document.addEventListener('keydown', auPremierAppui);
 
@@ -960,19 +962,29 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
   $('#toast-annuler').addEventListener('click', () => { if (annulerAction) annulerAction(); annulerAction = null; toast.classList.remove('visible'); });
 
   /* ---------- Actions principales ---------- */
-  $('#btn-serie').addEventListener('click', lancerRepos);
+  // Action déclenchée dès que le doigt touche le bouton (même s'il glisse ensuite) ;
+  // le clic qui suit est ignoré, et le clavier (Entrée, Espace) passe toujours par le clic.
+  function surAppui(el, action) {
+    let dernier = 0;
+    el.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 && e.pointerType === 'mouse') return;
+      dernier = performance.now(); action();
+    });
+    el.addEventListener('click', () => { if (performance.now() - dernier < 800) return; action(); });
+  }
   const relacher = () => btnAnneau.classList.remove('presse');
-  btnAnneau.addEventListener('pointerdown', () => { if (S.etat === 'effort') btnAnneau.classList.add('presse'); });
-  ['pointerup', 'pointerleave', 'pointercancel', 'blur'].forEach((ev) => btnAnneau.addEventListener(ev, relacher));
-  btnAnneau.addEventListener('click', () => {
+  ['pointerup', 'pointercancel', 'blur'].forEach((ev) => btnAnneau.addEventListener(ev, relacher));
+  function appuiAnneau() {
     if (S.etat !== 'effort') return;
-    relacher();
+    btnAnneau.classList.add('presse'); setTimeout(relacher, 160);
     btnAnneau.classList.remove('onde-active'); void btnAnneau.offsetWidth; btnAnneau.classList.add('onde-active');
     lancerRepos();
-  });
-  $('#btn-passer').addEventListener('click', () => finRepos(false));
-  $('#btn-plus').addEventListener('click', () => ajuster(15000));
-  $('#btn-moins').addEventListener('click', () => ajuster(-15000));
+  }
+  surAppui(btnAnneau, appuiAnneau);
+  surAppui($('#btn-serie'), lancerRepos);
+  surAppui($('#btn-passer'), () => finRepos(false));
+  surAppui($('#btn-plus'), () => ajuster(15000));
+  surAppui($('#btn-moins'), () => ajuster(-15000));
   function nouvelExercice() {
     if (S.etat !== 'effort') return;
     const avant = { serie: S.serie, debut: S.debutEffort };
