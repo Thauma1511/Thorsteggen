@@ -74,6 +74,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
 .f-alerte{background:
   radial-gradient(95% 62% at 50% 26%,#a8823f 0%,#523b1a 38%,rgba(22,15,7,0) 80%),
   linear-gradient(180deg,#160f07 0%,#050403 100%)}
+.f-intense{background:
+  radial-gradient(95% 62% at 50% 26%,#7a1c30 0%,#3d0d18 38%,rgba(18,5,8,0) 80%),
+  linear-gradient(180deg,#14060a 0%,#050203 100%)}
+:root[data-phase="intense"] .f-intense{opacity:1}
+:root[data-phase="intense"] .f-effort{opacity:0}
+:root[data-phase="intense"]{--anneau-a:#fff0f3;--anneau-b:#e09aaa;--halo:rgba(170,40,70,.34)}
+:root[data-phase="intense"] .etiquette{color:#f0a6b6}
+:root[data-phase="intense"] .arbre{opacity:.9}
 .f-top{background:radial-gradient(85% 60% at 50% 30%,#f4f2ec 0%,#9a9ca3 30%,rgba(20,21,24,0) 75%)}
 :root[data-phase="repos"] .f-repos,:root[data-phase="alerte"] .f-alerte{opacity:1}
 :root[data-phase="repos"] .f-effort,:root[data-phase="alerte"] .f-effort{opacity:0}
@@ -96,6 +104,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
 .tete{grid-area:tete;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:48px}
 .marque{font-family:var(--f-marque);font-size:11px;letter-spacing:.38em;text-transform:uppercase;color:var(--argent-doux);padding-left:2px;white-space:nowrap}
 .tete-actions{display:flex;align-items:center;gap:4px;margin-right:-6px}
+.modes{position:relative;display:flex;padding:3px;gap:2px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(236,235,231,.1);flex:none}
+.modes .pastille{border-radius:999px;box-shadow:0 4px 12px rgba(0,0,0,.35),inset 0 1px 0 #ffffff}
+.modes button{position:relative;z-index:1;height:30px;padding:0 13px;border:0;border-radius:999px;background:transparent;color:var(--argent-doux);
+  font-size:13px;font-weight:500;letter-spacing:.02em;cursor:pointer;transition:color .3s ease,transform .5s var(--ressort)}
+.modes button[aria-checked="true"]{color:var(--encre)}
+.modes button:active{transform:scale(.94);transition-duration:.08s}
+#app[data-occupe="1"] .modes{opacity:.45;pointer-events:none;transition:opacity .3s ease}
+@media (max-width:389px) and (orientation:portrait){.marque{display:none}}
+@media (orientation:portrait){.marque{letter-spacing:.28em}}
 .icone{width:44px;height:44px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:var(--argent-doux);cursor:pointer;
   transition:background .25s ease,color .25s ease,transform .55s var(--ressort)}
 .icone svg{width:22px;height:22px;overflow:visible}
@@ -179,6 +196,19 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
 .citation:empty,.citation.vide{display:none}
 #app[data-etat="effort"] .c-repos,#app[data-etat="top"] .c-repos,
 #app[data-etat="repos"] .c-effort,#app[data-etat="top"] .c-effort{opacity:0;visibility:hidden;pointer-events:none;transform:translateY(14px);transition:opacity .25s ease,transform .25s ease,visibility 0s linear .25s}
+/* ---------- Mode Tabata ---------- */
+.c-tabata{grid-area:1/1;display:none;flex-direction:column;gap:12px;justify-content:flex-end}
+#app[data-mode="tabata"] .c-tabata{display:flex}
+#app[data-mode="tabata"] .c-effort,#app[data-mode="tabata"] .c-repos,#app[data-mode="tabata"] .lien-tete{display:none!important}
+.tb-attente,.tb-marche{display:flex;flex-direction:column;gap:12px}
+.tb-marche{flex-direction:row;justify-content:center;gap:14px}
+#app[data-tb="marche"] .tb-attente,#app:not([data-tb="marche"]) .tb-marche{display:none}
+.tb-resume{align-self:center;display:inline-flex;align-items:center;gap:10px;height:40px;padding:0 18px;border-radius:999px;border:1px solid rgba(236,235,231,.16);
+  background:rgba(255,255,255,.03);color:#c9cbd0;font-size:14px;font-variant-numeric:tabular-nums;letter-spacing:.02em;cursor:pointer;
+  transition:background .25s ease,color .25s ease,border-color .25s ease,transform .5s var(--ressort)}
+.tb-resume svg{width:15px;height:15px;opacity:.7}
+.tb-resume:active{transform:scale(.95);transition-duration:.08s}
+.tb-marche .passer{min-width:132px}
 
 .durees{position:relative;display:flex;gap:8px;justify-content:center}
 .pastille{position:absolute;z-index:0;left:0;top:0;width:0;height:0;border-radius:999px;background:var(--argent);opacity:0;pointer-events:none;
@@ -219,6 +249,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
 
 @media (hover:hover) and (pointer:fine){
   .icone:hover{background:rgba(255,255,255,.08);color:var(--argent)}
+  .modes button:not([aria-checked="true"]):hover{color:#ffffff;background:rgba(255,255,255,.08)}
+  .modes:has(button[aria-checked="true"]:hover) .pastille{background:#ffffff}
+  .tb-resume:hover{color:#ffffff;background:rgba(255,255,255,.06);border-color:rgba(236,235,231,.3)}
   #app[data-etat="effort"] .anneau:hover svg{transform:scale(1.02)}
   #app[data-etat="effort"] .anneau:hover::before{transform:scale(1.08)}
   #app[data-etat="effort"] .anneau.presse:hover svg{transform:scale(.94)}
@@ -244,6 +277,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
   }
   .tete{min-height:42px}
   .tete .lien-tete{display:inline-flex}
+  .lien-tete .lien-texte{display:none}
+  .lien-tete{padding:0 10px}
+  .tb-attente{gap:8px}
   .c-effort .lien{display:none}
   .commandes{padding-top:4px}
   .c-effort{gap:8px;width:min(100%,460px);justify-self:center}
@@ -382,6 +418,7 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
   <div class="fond f-effort"></div>
   <div class="fond f-repos"></div>
   <div class="fond f-alerte"></div>
+  <div class="fond f-intense"></div>
   <div class="fond f-top"></div>
   <div class="vignette"></div>
   <div class="grain" id="grain"></div>
@@ -392,13 +429,17 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
   <source src="data:video/webm;base64,GkXfo59ChoEBQveBAULygQRC84EIQoKEd2VibUKHgQJChYECGFOAZwEAAAAAAAIzEU2bdLpNu4tTq4QVSalmU6yBoU27i1OrhBZUrmtTrIHYTbuMU6uEElTDZ1OsggEeTbuMU6uEHFO7a1OsggId7AEAAAAAAABZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVSalmsirXsYMPQkBNgI1MYXZmNjAuMTYuMTAwV0GNTGF2ZjYwLjE2LjEwMESJiECvQAAAAAAAFlSua8GuAQAAAAAAADjXgQFzxYiScs8f5Nbi45yBACK1nIN1bmSIgQCGhVZfVlA4g4EBI+ODhDuaygDgibCBELqBEJqBAhJUw2f8c3OgY8CAZ8iaRaOHRU5DT0RFUkSHjUxhdmY2MC4xNi4xMDBzc9ZjwItjxYiScs8f5Nbi42fIoUWjh0VOQ09ERVJEh5RMYXZjNjAuMzEuMTAyIGxpYnZweGfIoUWjiERVUkFUSU9ORIeTMDA6MDA6MDQuMDAwMDAwMDAwAB9DtnX554EAo6OBAACAEAIAnQEqEAAQAABHCIWFiJmEiAICAAwNYAD+/6tQgKOZgQPoALEBAAEQEAAYADA/9AwAAAD+/6tQgKOZgQfQALEBAAEQEAAYADA/9AwAAAD+/6tQgKOZgQu4ALEBAAEQEAAYADA/9AwAAAD+/6tQgBxTu2uRu4+zgQC3iveBAfGCAZ/wgQM=" type="video/webm">
 </video>
 
-<main id="app" data-etat="effort">
+<main id="app" data-etat="effort" data-mode="muscu" data-tb="attente">
   <header class="tete">
     <span class="marque">Thorsteggen</span>
+    <div class="modes" id="modes" role="radiogroup" aria-label="Mode">
+      <button type="button" role="radio" data-v="muscu">Muscu</button>
+      <button type="button" role="radio" data-v="tabata">Tabata</button>
+    </div>
     <div class="tete-actions">
-    <button class="lien lien-tete" id="btn-nouvel-tete" type="button">
+    <button class="lien lien-tete" id="btn-nouvel-tete" type="button" aria-label="Nouvel exercice">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4h4"/></svg>
-      Nouvel exercice
+      <span class="lien-texte">Nouvel exercice</span>
     </button>
     <button class="icone" id="btn-reglages" type="button" aria-label="Réglages" aria-haspopup="dialog" aria-controls="feuille">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
@@ -434,6 +475,19 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
   </section>
 
   <section class="commandes">
+    <div class="c-tabata">
+      <div class="tb-attente">
+        <button class="tb-resume" id="tb-resume" type="button" aria-label="Modifier le Tabata">
+          <span id="tb-resume-texte">20 s effort · 10 s repos · 8 tours</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg>
+        </button>
+        <button class="principal" id="tb-demarrer" type="button">Démarrer</button>
+      </div>
+      <div class="tb-marche">
+        <button class="passer" id="tb-pause" type="button">Pause</button>
+        <button class="passer" id="tb-arreter" type="button">Arrêter</button>
+      </div>
+    </div>
     <div class="c-effort">
       <div class="durees" id="durees" role="radiogroup" aria-label="Temps de repos"></div>
       <button class="principal" id="btn-serie" type="button">Série terminée</button>
@@ -464,6 +518,12 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
     <button class="ok" id="btn-fermer" type="button">OK</button>
   </div>
   <div class="feuille-corps">
+    <section class="groupe" style="--i:0">
+      <h3>Tabata</h3>
+      <div class="carte" id="editeur-tabata"></div>
+      <p class="note">Classique : 20 s d'effort, 10 s de repos, 8 tours, soit 3 min 50 (pas de repos après le dernier tour). Une préparation de 10 s précède le premier tour.</p>
+    </section>
+
     <section class="groupe" style="--i:0">
       <h3>Pendant la série</h3>
       <div class="carte">
@@ -557,7 +617,7 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
 
   /* ---------- Réglages ---------- */
   const CLE = 'thorsteggen.reglages.v1';
-  const DEFAUT = { durees: [30, 60, 90, 120, 150], choix: 3, alerte: 10, tics: true, voix: 'aucune', voixURI: '', musique: 'baisser', volume: 80, affichage: 'serie' };
+  const DEFAUT = { durees: [30, 60, 90, 120, 150], choix: 3, alerte: 10, tics: true, voix: 'aucune', voixURI: '', musique: 'baisser', volume: 80, affichage: 'serie', mode: 'muscu', tbEffort: 20, tbRepos: 10, tbTours: 8, tbBlocs: 1, tbPause: 60 };
   let R = Object.assign({}, DEFAUT);
   try {
     const lu = JSON.parse(localStorage.getItem(CLE) || 'null');
@@ -636,6 +696,7 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
   }
   function cloche(f, t0, duree, gain) { note(f, t0, duree, gain); note(f * 2, t0, duree * 0.55, gain * 0.22); note(f * 3.01, t0, duree * 0.3, gain * 0.06); }
   const sons = {
+    fin() { jouer((n) => { const t = n + 0.03; [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f, i) => cloche(f, t + i * 0.09, 1.6 - i * 0.12, 0.17)); [1046.5, 1318.5, 1567.98].forEach((f, i) => cloche(f, t + 0.6 + i * 0.07, 1.4, 0.1)); }); },
     repos() { jouer((n) => { const t = n + 0.03; cloche(659.25, t, 1.3, 0.2); cloche(493.88, t + 0.18, 1.8, 0.2); }); },
     alerte() { jouer((n) => { const t = n + 0.03; cloche(880, t, 1.7, 0.22); cloche(1318.5, t + 0.14, 1.5, 0.1); }); },
     tic() { jouer((n) => { note(1046.5, n + 0.01, 0.16, 0.12); }); },
@@ -760,7 +821,7 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
   const fmtChrono = (ms) => fmt(Math.floor(Math.max(0, ms) / 1000));
 
   function poserPhase(p) { racine.dataset.phase = p; }
-  function poserEtat(e) { S.etat = e; app.dataset.etat = e; btnAnneau.setAttribute('aria-disabled', String(e !== 'effort')); }
+  function poserEtat(e) { S.etat = e; app.dataset.etat = e; btnAnneau.setAttribute('aria-disabled', String(e !== 'effort')); app.dataset.occupe = e === 'effort' ? '0' : '1'; }
   function progression(p, remplir) {
     anneau.classList.toggle('remplir', !!remplir);
     anneau.style.strokeDashoffset = (CIRC * (1 - Math.min(1, Math.max(0, p)))).toFixed(2);
@@ -889,6 +950,7 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
   }
 
   function tick() {
+    if (R.mode === 'tabata') { tickTabata(); return; }
     if (S.etat === 'repos') {
       const reste = S.fin - maintenant();
       if (reste <= 0) { finRepos(reste < -2500); return; }
@@ -908,7 +970,7 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
   let rafActif = false;
   function boucle() {
     if (rafActif) return; rafActif = true;
-    const pas = () => { tick(); if (S.etat === 'repos' && document.visibilityState === 'visible') requestAnimationFrame(pas); else rafActif = false; };
+    const pas = () => { tick(); if ((S.etat === 'repos' || TB.actif) && document.visibilityState === 'visible') requestAnimationFrame(pas); else rafActif = false; };
     requestAnimationFrame(pas);
   }
   setInterval(tick, 250);
@@ -952,6 +1014,145 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
     placerPastille(zoneDurees, bs[R.choix], anime);
   }
 
+
+  /* ---------- Mode Tabata : préparation, puis effort et repos enchaînés automatiquement ---------- */
+  const TB = { actif: false, debut: 0, decalage: 0, pauseDepuis: 0, phases: [], idx: -1, tics: {}, fin: false };
+  const NOMS_TB = { prep: 'Prépare-toi', effort: 'Effort', repos: 'Repos', pause: 'Pause entre blocs' };
+  function construirePhases() {
+    const ph = [{ type: 'prep', d: 10 }];
+    for (let b = 1; b <= R.tbBlocs; b++) {
+      for (let t = 1; t <= R.tbTours; t++) {
+        ph.push({ type: 'effort', d: R.tbEffort, tour: t, bloc: b });
+        if (t < R.tbTours) ph.push({ type: 'repos', d: R.tbRepos, tour: t, bloc: b });
+      }
+      if (b < R.tbBlocs) ph.push({ type: 'pause', d: R.tbPause, tour: R.tbTours, bloc: b });
+    }
+    let t0 = 0; ph.forEach((p) => { p.t0 = t0; t0 += p.d * 1000; });
+    return ph;
+  }
+  const dureeTabata = () => R.tbBlocs * (R.tbTours * R.tbEffort + (R.tbTours - 1) * R.tbRepos) + (R.tbBlocs - 1) * R.tbPause;
+  function resumeTabata() {
+    return R.tbEffort + ' s effort · ' + R.tbRepos + ' s repos · ' + R.tbTours + ' tours' + (R.tbBlocs > 1 ? ' × ' + R.tbBlocs : '');
+  }
+  function occupe() { app.dataset.occupe = (TB.actif || S.etat !== 'effort') ? '1' : '0'; }
+  function afficherAttenteTabata() {
+    app.dataset.tb = 'attente'; poserPhase('effort'); effacerMessage();
+    elChiffres.classList.remove('arrete', 'top');
+    ecrire(elEtiquette, 'Tabata');
+    ecrire(elChiffres, fmt(dureeTabata()));
+    ecrire(elSous, R.tbTours + ' tours' + (R.tbBlocs > 1 ? ' × ' + R.tbBlocs + ' blocs' : '') + ' · touchez le logo pour démarrer');
+    $('#tb-resume-texte').textContent = resumeTabata();
+    progression(1, true); occupe();
+  }
+  function demarrerTabata() {
+    if (TB.actif) return;
+    TB.phases = construirePhases(); TB.actif = true; TB.fin = false; TB.debut = maintenant(); TB.decalage = 0; TB.pauseDepuis = 0; TB.idx = -1; TB.tics = {};
+    app.dataset.tb = 'marche'; $('#tb-pause').textContent = 'Pause'; occupe();
+    morph(); tickTabata(); boucle();
+  }
+  function arreterTabata(silencieux) {
+    TB.actif = false; TB.pauseDepuis = 0; clearTimeout(TB.tFin);
+    if (!silencieux) { /* retour direct à l'attente */ }
+    afficherAttenteTabata(); morph();
+  }
+  function pauseTabata() {
+    if (!TB.actif) return;
+    if (TB.pauseDepuis) {
+      TB.decalage += maintenant() - TB.pauseDepuis; TB.pauseDepuis = 0;
+      $('#tb-pause').textContent = 'Pause';
+      if (TB.phases[TB.idx]) ecrire(elEtiquette, NOMS_TB[TB.phases[TB.idx].type]);
+      boucle();
+    } else {
+      TB.pauseDepuis = maintenant(); $('#tb-pause').textContent = 'Reprendre';
+      ecrire(elEtiquette, 'En pause');
+    }
+  }
+  function terminerTabata() {
+    TB.actif = false; TB.fin = true; app.dataset.tb = 'attente'; occupe();
+    poserPhase('effort'); progression(1, true);
+    ecrire(elEtiquette, 'Bravo');
+    afficherMessage('Terminé !'); elChiffres.classList.remove('battement', 'morph'); relancer(elChiffres, 'top');
+    ecrire(elSous, R.tbTours * R.tbBlocs + ' tours accomplis');
+    sons.fin(); setTimeout(() => dire('Terminé !'), 150);
+    const r = btnAnneau.getBoundingClientRect();
+    eclat.style.setProperty('--cx', (r.left + r.width / 2) + 'px'); eclat.style.setProperty('--cy', (r.top + r.height / 2) + 'px');
+    relancer(racine, 'eclair'); setTimeout(() => racine.classList.remove('eclair'), 1900);
+    relancer(btnAnneau, 'ondes-top'); setTimeout(() => btnAnneau.classList.remove('ondes-top'), 1800);
+    clearTimeout(TB.tFin);
+    TB.tFin = setTimeout(() => { elChiffres.classList.remove('top'); if (!TB.actif) { afficherAttenteTabata(); morph(); } }, 2600);
+  }
+  function entrerPhase(p, aLHeure) {
+    const phase = p.type === 'effort' ? 'intense' : p.type === 'prep' ? 'alerte' : 'repos';
+    poserPhase(phase);
+    ecrire(elEtiquette, NOMS_TB[p.type]);
+    ecrire(elSous, p.type === 'prep' ? 'Tour 1 / ' + R.tbTours + ' dans un instant'
+      : 'Tour ' + p.tour + ' / ' + R.tbTours + (R.tbBlocs > 1 ? ' · Bloc ' + p.bloc + ' / ' + R.tbBlocs : ''));
+    if (!aLHeure) return;
+    if (p.type === 'effort') { sons.top(); setTimeout(() => dire('Effort'), 120); relancer(btnAnneau, 'onde-active'); }
+    else if (p.type === 'repos' || p.type === 'pause') { sons.repos(); setTimeout(() => dire('Repos'), 200); }
+    else { sons.alerte(); }
+    morph();
+  }
+  function tickTabata() {
+    if (!TB.actif) return;
+    const ecoule = (TB.pauseDepuis || maintenant()) - TB.debut - TB.decalage;
+    let i = TB.phases.findIndex((p) => ecoule < p.t0 + p.d * 1000);
+    if (i < 0) { terminerTabata(); return; }
+    const p = TB.phases[i];
+    if (i !== TB.idx) {
+      const retard = ecoule - p.t0;
+      TB.idx = i; TB.tics = {};
+      entrerPhase(p, retard < 700);
+      if (TB.pauseDepuis) ecrire(elEtiquette, 'En pause');
+    }
+    const reste = p.t0 + p.d * 1000 - ecoule;
+    if (R.tics && !TB.pauseDepuis) for (const n of [3, 2, 1]) {
+      if (!TB.tics[n] && reste <= n * 1000 && p.d > n) { TB.tics[n] = true; if (reste > n * 1000 - 600) { sons.tic(); battre(); } }
+    }
+    ecrire(elChiffres, fmt(Math.ceil(reste / 1000)));
+    progression(reste / (p.d * 1000), false);
+  }
+  function choisirMode(m, anime) {
+    if (TB.actif || S.etat !== 'effort') return;
+    R.mode = m; sauver(); app.dataset.mode = m;
+    const zone = $('#modes'); let choisi = null;
+    zone.querySelectorAll('button').forEach((b) => { const oui = b.dataset.v === m; b.setAttribute('aria-checked', String(oui)); if (oui) choisi = b; });
+    placerPastille(zone, choisi, anime);
+    btnAnneau.setAttribute('aria-label', m === 'tabata' ? 'Démarrer le Tabata' : 'Série terminée');
+    if (m === 'tabata') afficherAttenteTabata();
+    else { poserPhase('effort'); effacerMessage(); afficherEffort(); }
+    morph(); occupe();
+  }
+  $('#modes').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => choisirMode(b.dataset.v, true)));
+  surAppui($('#tb-demarrer'), demarrerTabata);
+  surAppui($('#tb-pause'), pauseTabata);
+  $('#tb-arreter').addEventListener('click', () => arreterTabata(false));
+  $('#tb-resume').addEventListener('click', ouvrir);
+  const REGLAGES_TB = [
+    { cle: 'tbEffort', titre: 'Effort', min: 5, max: 180, pas: 5, f: (v) => v + ' s' },
+    { cle: 'tbRepos', titre: 'Repos', min: 5, max: 180, pas: 5, f: (v) => v + ' s' },
+    { cle: 'tbTours', titre: 'Tours', min: 1, max: 30, pas: 1, f: (v) => String(v) },
+    { cle: 'tbBlocs', titre: 'Blocs', min: 1, max: 10, pas: 1, f: (v) => String(v) },
+    { cle: 'tbPause', titre: 'Pause entre blocs', min: 15, max: 300, pas: 15, f: (v) => fmt(v) }
+  ];
+  function rendreEditeurTabata() {
+    const ed = $('#editeur-tabata'); ed.innerHTML = '';
+    REGLAGES_TB.forEach((c) => {
+      const ligne = document.createElement('div'); ligne.className = 'ligne';
+      ligne.innerHTML = '<span class="ligne-titre"></span><div class="pas"><button class="mini" type="button">−</button><output></output><button class="mini" type="button">+</button></div>';
+      ligne.querySelector('.ligne-titre').textContent = c.titre;
+      const [moins, plus] = ligne.querySelectorAll('.mini'); const sortieV = ligne.querySelector('output');
+      moins.setAttribute('aria-label', c.titre + ' : moins'); plus.setAttribute('aria-label', c.titre + ' : plus');
+      const maj = (sens) => {
+        sortieV.textContent = c.f(R[c.cle]); moins.disabled = R[c.cle] <= c.min; plus.disabled = R[c.cle] >= c.max;
+        if (sens) { sortieV.classList.remove('roule-haut', 'roule-bas'); relancer(sortieV, sens > 0 ? 'roule-haut' : 'roule-bas'); }
+      };
+      const changer = (d) => { R[c.cle] = Math.min(c.max, Math.max(c.min, R[c.cle] + d * c.pas)); sauver(); maj(d); if (R.mode === 'tabata' && !TB.actif) afficherAttenteTabata(); };
+      moins.addEventListener('click', () => changer(-1)); plus.addEventListener('click', () => changer(1));
+      maj(0); ed.appendChild(ligne);
+    });
+  }
+
   /* ---------- Toast ---------- */
   const toast = $('#toast'); let tToast = null, annulerAction = null;
   function montrerToast(texte, annuler) {
@@ -975,6 +1176,7 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
   const relacher = () => btnAnneau.classList.remove('presse');
   ['pointerup', 'pointercancel', 'blur'].forEach((ev) => btnAnneau.addEventListener(ev, relacher));
   function appuiAnneau() {
+    if (R.mode === 'tabata') { if (!TB.actif) { btnAnneau.classList.add('presse'); setTimeout(relacher, 160); relancer(btnAnneau, 'onde-active'); demarrerTabata(); } return; }
     if (S.etat !== 'effort') return;
     btnAnneau.classList.add('presse'); setTimeout(relacher, 160);
     btnAnneau.classList.remove('onde-active'); void btnAnneau.offsetWidth; btnAnneau.classList.add('onde-active');
@@ -995,7 +1197,10 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
   $('#btn-nouvel-tete').addEventListener('click', nouvelExercice);
   document.addEventListener('keydown', (e) => {
     if (feuille.classList.contains('ouvert')) { if (e.key === 'Escape') fermer(); return; }
-    if ((e.key === ' ' || e.key === 'Enter') && S.etat === 'effort' && document.activeElement === document.body) { e.preventDefault(); lancerRepos(); }
+    if ((e.key === ' ' || e.key === 'Enter') && document.activeElement === document.body) {
+      if (R.mode === 'tabata') { e.preventDefault(); if (!TB.actif) demarrerTabata(); else pauseTabata(); }
+      else if (S.etat === 'effort') { e.preventDefault(); lancerRepos(); }
+    }
   });
 
   /* ---------- Feuille de réglages ---------- */
@@ -1033,6 +1238,7 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
     });
     segment('#seg-alerte', R.alerte, (v) => { R.alerte = +v; sauver(); });
     segment('#seg-voix', R.voix, (v) => { R.voix = v; sauver(); majInfoVoix(); rendreListeVoix(); });
+    rendreEditeurTabata();
     segment('#seg-affichage', R.affichage, (v) => { R.affichage = v; sauver(); if (S.etat === 'effort') { afficherEffort(); morph(); } });
     const sw = $('#sw-tics'); sw.setAttribute('aria-checked', String(!!R.tics));
     sw.onclick = () => { R.tics = !R.tics; sauver(); sw.setAttribute('aria-checked', String(R.tics)); };
@@ -1060,8 +1266,10 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
   } catch (e) {}
 
   poserPhase('effort'); rendreDurees(); afficherEffort(); majEcran(); garderEcran();
+  { const m = R.mode === 'tabata' ? 'tabata' : 'muscu'; R.mode = 'muscu'; choisirMode(m, false); }
   const replacer = () => {
     majDurees(false);
+    { const z = $('#modes'); placerPastille(z, z.querySelector('[aria-checked="true"]'), false); }
     if (feuille.classList.contains('ouvert')) feuille.querySelectorAll('.segment').forEach((sg) => placerPastille(sg, sg.querySelector('[aria-checked="true"]'), false));
   };
   window.addEventListener('resize', replacer);
@@ -1092,7 +1300,7 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
         ], { duration: 1150, fill: 'backwards' });
         setTimeout(() => btnAnneau.classList.remove('sans-halo'), 700);
         $('.fonds').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 900, delay: 200, easing: 'ease-out', fill: 'backwards' });
-        const els = ['.marque', '.tete-actions', '#etiquette', '#chiffres', '#sous', '#durees', '#btn-serie', '#btn-nouvel']
+        const els = ['.marque', '#modes', '.tete-actions', '#etiquette', '#chiffres', '#sous', '#durees', '#btn-serie', '#btn-nouvel', '#tb-resume', '#tb-demarrer']
           .map((sel) => $(sel)).filter((el) => el && el.offsetParent !== null);
         els.forEach((el, i) => el.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }],
           { duration: 500, delay: 700 + i * 60, easing: 'cubic-bezier(.22,.8,.22,1)', fill: 'backwards' }));
@@ -1111,7 +1319,7 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
       arbre.animate([{ opacity: 0, transform: 'scale(.78)' }, { opacity: 1, transform: 'scale(1)' }],
         { duration: 650, delay: 200, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'backwards' });
       $('.fonds').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 1000, delay: 350, easing: 'ease-out', fill: 'backwards' });
-      const elements = ['.marque', '.tete-actions', '#etiquette', '#chiffres', '#sous', '#durees', '#btn-serie', '#btn-nouvel']
+      const elements = ['.marque', '#modes', '.tete-actions', '#etiquette', '#chiffres', '#sous', '#durees', '#btn-serie', '#btn-nouvel', '#tb-resume', '#tb-demarrer']
         .map((sel) => $(sel)).filter((el) => el && el.offsetParent !== null);
       elements.forEach((el, i) => el.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }],
         { duration: 500, delay: 950 + i * 60, easing: 'cubic-bezier(.22,.8,.22,1)', fill: 'backwards' }));
