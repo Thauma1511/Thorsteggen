@@ -197,12 +197,19 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
 #app[data-etat="effort"] .c-repos,#app[data-etat="top"] .c-repos,
 #app[data-etat="repos"] .c-effort,#app[data-etat="top"] .c-effort{opacity:0;visibility:hidden;pointer-events:none;transform:translateY(14px);transition:opacity .25s ease,transform .25s ease,visibility 0s linear .25s}
 /* ---------- Mode Tabata ---------- */
-.c-tabata{grid-area:1/1;display:none;flex-direction:column;gap:12px;justify-content:flex-end}
-#app[data-mode="tabata"] .c-tabata{display:flex}
+.c-tabata{grid-area:1/1;display:none}
+#app[data-mode="tabata"] .c-tabata{display:grid}
 #app[data-mode="tabata"] .c-effort,#app[data-mode="tabata"] .c-repos,#app[data-mode="tabata"] .lien-tete{display:none!important}
-.tb-attente,.tb-marche{display:flex;flex-direction:column;gap:12px}
-.tb-marche{flex-direction:row;justify-content:center;gap:14px}
-#app[data-tb="marche"] .tb-attente,#app:not([data-tb="marche"]) .tb-marche{display:none}
+.tb-attente,.tb-marche{grid-area:1/1;display:flex;flex-direction:column;gap:12px;justify-content:flex-end;transition:opacity .35s ease,transform .5s var(--ressort-doux)}
+.tb-ligne{display:flex;justify-content:center;gap:14px}
+#app[data-tb="marche"] .tb-attente,#app:not([data-tb="marche"]) .tb-marche{opacity:0;visibility:hidden;pointer-events:none;transform:translateY(12px);transition:opacity .2s ease,transform .2s ease,visibility 0s linear .2s}
+#app:not([data-wod="amrap"]):not([data-wod="fortime"]) #tb-action{display:none}
+.formats{position:relative;display:flex;padding:3px;gap:2px;border-radius:14px;background:rgba(0,0,0,.35);border:1px solid rgba(236,235,231,.1)}
+.formats .pastille{border-radius:11px;box-shadow:0 4px 12px rgba(0,0,0,.35),inset 0 1px 0 #ffffff}
+.formats button{position:relative;z-index:1;flex:1 1 0;height:36px;padding:0 6px;border:0;border-radius:11px;background:transparent;color:var(--argent-doux);
+  font-size:13.5px;font-weight:500;letter-spacing:.02em;white-space:nowrap;cursor:pointer;transition:color .3s ease,transform .5s var(--ressort)}
+.formats button[aria-checked="true"]{color:var(--encre)}
+.formats button:active{transform:scale(.94);transition-duration:.08s}
 .tb-resume{align-self:center;display:inline-flex;align-items:center;gap:10px;height:40px;padding:0 18px;border-radius:999px;border:1px solid rgba(236,235,231,.16);
   background:rgba(255,255,255,.03);color:#c9cbd0;font-size:14px;font-variant-numeric:tabular-nums;letter-spacing:.02em;cursor:pointer;
   transition:background .25s ease,color .25s ease,border-color .25s ease,transform .5s var(--ressort)}
@@ -251,6 +258,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
   .icone:hover{background:rgba(255,255,255,.08);color:var(--argent)}
   .modes button:not([aria-checked="true"]):hover{color:#ffffff;background:rgba(255,255,255,.08)}
   .modes:has(button[aria-checked="true"]:hover) .pastille{background:#ffffff}
+  .formats button:not([aria-checked="true"]):hover{color:#ffffff;background:rgba(255,255,255,.08)}
+  .formats:has(button[aria-checked="true"]:hover) .pastille{background:#ffffff}
   .tb-resume:hover{color:#ffffff;background:rgba(255,255,255,.06);border-color:rgba(236,235,231,.3)}
   #app[data-etat="effort"] .anneau:hover svg{transform:scale(1.02)}
   #app[data-etat="effort"] .anneau:hover::before{transform:scale(1.08)}
@@ -279,7 +288,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
   .tete .lien-tete{display:inline-flex}
   .lien-tete .lien-texte{display:none}
   .lien-tete{padding:0 10px}
-  .tb-attente{gap:8px}
+  .tb-attente,.tb-marche{gap:8px}
+  .formats button{height:32px}
+  #tb-action{height:48px}
   .c-effort .lien{display:none}
   .commandes{padding-top:4px}
   .c-effort{gap:8px;width:min(100%,460px);justify-self:center}
@@ -406,7 +417,6 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
 </head>
 <body>
 
-
 <script>try{var R_=document.documentElement;if(navigator.standalone===true||matchMedia('(display-mode: standalone)').matches)R_.classList.add('autonome');if(!matchMedia('(prefers-reduced-motion: reduce)').matches)R_.classList.add('intro')}catch(e){}</script>
 <div class="depart" id="depart"><svg viewBox="32 30 1180 1180" aria-hidden="true"><defs><linearGradient id="g-depart" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#c9ccd2"/></linearGradient></defs><circle cx="622" cy="620" r="598" fill="none" stroke="rgba(236,235,231,.07)" stroke-width="2"/><circle cx="622" cy="620" r="540" fill="none" stroke="url(#g-depart)" stroke-width="58"/><g fill="#f3f2ee"><circle cx="622" cy="295" r="150"/><circle cx="333" cy="442" r="145"/><circle cx="911" cy="442" r="145"/><rect x="581.5" y="400" width="81" height="689"/><path d="M346 500 L447 500 L582.5 651 L582.5 763 Z"/><path d="M898 500 L797 500 L661.5 651 L661.5 763 Z"/></g></svg></div>
 <script>
@@ -429,12 +439,12 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
   <source src="data:video/webm;base64,GkXfo59ChoEBQveBAULygQRC84EIQoKEd2VibUKHgQJChYECGFOAZwEAAAAAAAIzEU2bdLpNu4tTq4QVSalmU6yBoU27i1OrhBZUrmtTrIHYTbuMU6uEElTDZ1OsggEeTbuMU6uEHFO7a1OsggId7AEAAAAAAABZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVSalmsirXsYMPQkBNgI1MYXZmNjAuMTYuMTAwV0GNTGF2ZjYwLjE2LjEwMESJiECvQAAAAAAAFlSua8GuAQAAAAAAADjXgQFzxYiScs8f5Nbi45yBACK1nIN1bmSIgQCGhVZfVlA4g4EBI+ODhDuaygDgibCBELqBEJqBAhJUw2f8c3OgY8CAZ8iaRaOHRU5DT0RFUkSHjUxhdmY2MC4xNi4xMDBzc9ZjwItjxYiScs8f5Nbi42fIoUWjh0VOQ09ERVJEh5RMYXZjNjAuMzEuMTAyIGxpYnZweGfIoUWjiERVUkFUSU9ORIeTMDA6MDA6MDQuMDAwMDAwMDAwAB9DtnX554EAo6OBAACAEAIAnQEqEAAQAABHCIWFiJmEiAICAAwNYAD+/6tQgKOZgQPoALEBAAEQEAAYADA/9AwAAAD+/6tQgKOZgQfQALEBAAEQEAAYADA/9AwAAAD+/6tQgKOZgQu4ALEBAAEQEAAYADA/9AwAAAD+/6tQgBxTu2uRu4+zgQC3iveBAfGCAZ/wgQM=" type="video/webm">
 </video>
 
-<main id="app" data-etat="effort" data-mode="muscu" data-tb="attente">
+<main id="app" data-etat="effort" data-mode="muscu" data-tb="attente" data-wod="tabata">
   <header class="tete">
     <span class="marque">Thorsteggen</span>
     <div class="modes" id="modes" role="radiogroup" aria-label="Mode">
       <button type="button" role="radio" data-v="muscu">Muscu</button>
-      <button type="button" role="radio" data-v="tabata">Tabata</button>
+      <button type="button" role="radio" data-v="tabata">WOD</button>
     </div>
     <div class="tete-actions">
     <button class="lien lien-tete" id="btn-nouvel-tete" type="button" aria-label="Nouvel exercice">
@@ -477,15 +487,24 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
   <section class="commandes">
     <div class="c-tabata">
       <div class="tb-attente">
-        <button class="tb-resume" id="tb-resume" type="button" aria-label="Modifier le Tabata">
+        <div class="formats" id="formats" role="radiogroup" aria-label="Format du WOD">
+          <button type="button" role="radio" data-v="tabata">Tabata</button>
+          <button type="button" role="radio" data-v="emom">EMOM</button>
+          <button type="button" role="radio" data-v="amrap">AMRAP</button>
+          <button type="button" role="radio" data-v="fortime">For Time</button>
+        </div>
+        <button class="tb-resume" id="tb-resume" type="button" aria-label="Modifier les réglages du WOD">
           <span id="tb-resume-texte">20 s effort · 10 s repos · 8 tours</span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg>
         </button>
         <button class="principal" id="tb-demarrer" type="button">Démarrer</button>
       </div>
       <div class="tb-marche">
-        <button class="passer" id="tb-pause" type="button">Pause</button>
-        <button class="passer" id="tb-arreter" type="button">Arrêter</button>
+        <button class="principal" id="tb-action" type="button">Tour terminé</button>
+        <div class="tb-ligne">
+          <button class="passer" id="tb-pause" type="button">Pause</button>
+          <button class="passer" id="tb-arreter" type="button">Arrêter</button>
+        </div>
       </div>
     </div>
     <div class="c-effort">
@@ -519,9 +538,9 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
   </div>
   <div class="feuille-corps">
     <section class="groupe" style="--i:0">
-      <h3>Tabata</h3>
+      <h3 id="titre-wod">WOD · Tabata</h3>
       <div class="carte" id="editeur-tabata"></div>
-      <p class="note">Classique : 20 s d'effort, 10 s de repos, 8 tours, soit 3 min 50 (pas de repos après le dernier tour). Une préparation de 10 s précède le premier tour.</p>
+      <p class="note" id="note-wod"></p>
     </section>
 
     <section class="groupe" style="--i:0">
@@ -617,7 +636,7 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
 
   /* ---------- Réglages ---------- */
   const CLE = 'thorsteggen.reglages.v1';
-  const DEFAUT = { durees: [30, 60, 90, 120, 150], choix: 3, alerte: 10, tics: true, voix: 'aucune', voixURI: '', musique: 'baisser', volume: 80, affichage: 'serie', mode: 'muscu', tbEffort: 20, tbRepos: 10, tbTours: 8, tbBlocs: 1, tbPause: 60 };
+  const DEFAUT = { durees: [30, 60, 90, 120, 150], choix: 3, alerte: 10, tics: true, voix: 'aucune', voixURI: '', musique: 'baisser', volume: 80, affichage: 'serie', mode: 'muscu', wod: 'tabata', tbEffort: 20, tbRepos: 10, tbTours: 8, tbBlocs: 1, tbPause: 60, emomIntervalle: 60, emomTours: 10, amrapDuree: 12, ftLimite: 20 };
   let R = Object.assign({}, DEFAUT);
   try {
     const lu = JSON.parse(localStorage.getItem(CLE) || 'null');
@@ -1015,46 +1034,88 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
   }
 
 
-  /* ---------- Mode Tabata : préparation, puis effort et repos enchaînés automatiquement ---------- */
-  const TB = { actif: false, debut: 0, decalage: 0, pauseDepuis: 0, phases: [], idx: -1, tics: {}, fin: false };
-  const NOMS_TB = { prep: 'Prépare-toi', effort: 'Effort', repos: 'Repos', pause: 'Pause entre blocs' };
+  /* ---------- Mode WOD : Tabata, EMOM, AMRAP, For Time ---------- */
+  const TB = { actif: false, debut: 0, decalage: 0, pauseDepuis: 0, phases: [], idx: -1, tics: {}, tours: 0, alerteFaite: false };
+  const FORMATS = { tabata: 'Tabata', emom: 'EMOM', amrap: 'AMRAP', fortime: 'For Time' };
+  const NOMS_TB = { prep: 'Prépare-toi', effort: 'Effort', repos: 'Repos', pause: 'Pause entre blocs', minute: 'EMOM', amrap: 'AMRAP', fortime: 'For Time' };
+  const NOTES_WOD = {
+    tabata: "Classique : 20 s d'effort, 10 s de repos, 8 tours, soit 3 min 50 (pas de repos après le dernier tour).",
+    emom: "Au début de chaque intervalle, faites vos répétitions, puis reposez-vous jusqu'au bip suivant.",
+    amrap: "Le plus de tours possible dans le temps imparti. Touchez le logo ou « Tour terminé » à chaque tour.",
+    fortime: "Faites votre circuit le plus vite possible, puis touchez « Terminé ». La limite arrête le chrono si elle est atteinte."
+  };
+  const w = () => R.wod in FORMATS ? R.wod : 'tabata';
   function construirePhases() {
     const ph = [{ type: 'prep', d: 10 }];
-    for (let b = 1; b <= R.tbBlocs; b++) {
-      for (let t = 1; t <= R.tbTours; t++) {
-        ph.push({ type: 'effort', d: R.tbEffort, tour: t, bloc: b });
-        if (t < R.tbTours) ph.push({ type: 'repos', d: R.tbRepos, tour: t, bloc: b });
+    if (w() === 'tabata') {
+      for (let b = 1; b <= R.tbBlocs; b++) {
+        for (let t = 1; t <= R.tbTours; t++) {
+          ph.push({ type: 'effort', d: R.tbEffort, tour: t, bloc: b });
+          if (t < R.tbTours) ph.push({ type: 'repos', d: R.tbRepos, tour: t, bloc: b });
+        }
+        if (b < R.tbBlocs) ph.push({ type: 'pause', d: R.tbPause, tour: R.tbTours, bloc: b });
       }
-      if (b < R.tbBlocs) ph.push({ type: 'pause', d: R.tbPause, tour: R.tbTours, bloc: b });
+    } else if (w() === 'emom') {
+      for (let t = 1; t <= R.emomTours; t++) ph.push({ type: 'minute', d: R.emomIntervalle, tour: t });
+    } else if (w() === 'amrap') {
+      ph.push({ type: 'amrap', d: R.amrapDuree * 60 });
+    } else {
+      ph.push({ type: 'fortime', d: R.ftLimite * 60 });
     }
     let t0 = 0; ph.forEach((p) => { p.t0 = t0; t0 += p.d * 1000; });
     return ph;
   }
-  const dureeTabata = () => R.tbBlocs * (R.tbTours * R.tbEffort + (R.tbTours - 1) * R.tbRepos) + (R.tbBlocs - 1) * R.tbPause;
-  function resumeTabata() {
-    return R.tbEffort + ' s effort · ' + R.tbRepos + ' s repos · ' + R.tbTours + ' tours' + (R.tbBlocs > 1 ? ' × ' + R.tbBlocs : '');
+  function dureeWod() {
+    if (w() === 'tabata') return R.tbBlocs * (R.tbTours * R.tbEffort + (R.tbTours - 1) * R.tbRepos) + (R.tbBlocs - 1) * R.tbPause;
+    if (w() === 'emom') return R.emomTours * R.emomIntervalle;
+    if (w() === 'amrap') return R.amrapDuree * 60;
+    return 0;
+  }
+  const intervalleTexte = () => R.emomIntervalle % 60 === 0 ? (R.emomIntervalle / 60) + ' min' : fmt(R.emomIntervalle);
+  function resumeWod() {
+    if (w() === 'tabata') return R.tbEffort + ' s effort · ' + R.tbRepos + ' s repos · ' + R.tbTours + ' tours' + (R.tbBlocs > 1 ? ' × ' + R.tbBlocs : '');
+    if (w() === 'emom') return R.emomTours + ' × ' + intervalleTexte();
+    if (w() === 'amrap') return R.amrapDuree + ' min, max de tours';
+    return 'Limite de ' + R.ftLimite + ' min';
+  }
+  function sousAttente() {
+    if (w() === 'tabata') return R.tbTours + ' tours' + (R.tbBlocs > 1 ? ' × ' + R.tbBlocs + ' blocs' : '') + ' · touchez le logo pour démarrer';
+    if (w() === 'emom') return R.emomTours + ' intervalles de ' + intervalleTexte() + ' · touchez le logo';
+    if (w() === 'amrap') return 'Le plus de tours possible · touchez le logo';
+    return 'Le plus vite possible · touchez le logo';
   }
   function occupe() { app.dataset.occupe = (TB.actif || S.etat !== 'effort') ? '1' : '0'; }
   function afficherAttenteTabata() {
-    app.dataset.tb = 'attente'; poserPhase('effort'); effacerMessage();
+    app.dataset.tb = 'attente'; app.dataset.wod = w(); poserPhase('effort'); effacerMessage();
     elChiffres.classList.remove('arrete', 'top');
-    ecrire(elEtiquette, 'Tabata');
-    ecrire(elChiffres, fmt(dureeTabata()));
-    ecrire(elSous, R.tbTours + ' tours' + (R.tbBlocs > 1 ? ' × ' + R.tbBlocs + ' blocs' : '') + ' · touchez le logo pour démarrer');
-    $('#tb-resume-texte').textContent = resumeTabata();
+    ecrire(elEtiquette, FORMATS[w()]);
+    ecrire(elChiffres, fmt(dureeWod()));
+    ecrire(elSous, sousAttente());
+    $('#tb-resume-texte').textContent = resumeWod();
+    btnAnneau.setAttribute('aria-label', 'Démarrer le ' + FORMATS[w()]);
     progression(1, true); occupe();
   }
+  function majFormats(anime) {
+    const zone = $('#formats'); let choisi = null;
+    zone.querySelectorAll('button').forEach((b) => { const oui = b.dataset.v === w(); b.setAttribute('aria-checked', String(oui)); if (oui) choisi = b; });
+    placerPastille(zone, choisi, anime);
+  }
+  function choisirFormat(f) {
+    if (TB.actif) return;
+    R.wod = f; sauver(); majFormats(true); afficherAttenteTabata(); morph();
+    if (feuille.classList.contains('ouvert')) rendreEditeurTabata();
+  }
+  $('#formats').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => choisirFormat(b.dataset.v)));
   function demarrerTabata() {
     if (TB.actif) return;
-    TB.phases = construirePhases(); TB.actif = true; TB.fin = false; TB.debut = maintenant(); TB.decalage = 0; TB.pauseDepuis = 0; TB.idx = -1; TB.tics = {};
-    app.dataset.tb = 'marche'; $('#tb-pause').textContent = 'Pause'; occupe();
-    morph(); tickTabata(); boucle();
+    TB.phases = construirePhases(); TB.actif = true; TB.debut = maintenant(); TB.decalage = 0; TB.pauseDepuis = 0; TB.idx = -1; TB.tics = {}; TB.tours = 0; TB.alerteFaite = false;
+    app.dataset.tb = 'marche'; app.dataset.wod = w();
+    $('#tb-pause').textContent = 'Pause';
+    $('#tb-action').textContent = w() === 'fortime' ? 'Terminé' : 'Tour terminé';
+    btnAnneau.setAttribute('aria-label', w() === 'amrap' ? 'Tour terminé' : FORMATS[w()]);
+    occupe(); morph(); tickTabata(); boucle();
   }
-  function arreterTabata(silencieux) {
-    TB.actif = false; TB.pauseDepuis = 0; clearTimeout(TB.tFin);
-    if (!silencieux) { /* retour direct à l'attente */ }
-    afficherAttenteTabata(); morph();
-  }
+  function arreterTabata() { TB.actif = false; TB.pauseDepuis = 0; clearTimeout(TB.tFin); afficherAttenteTabata(); morph(); }
   function pauseTabata() {
     if (!TB.actif) return;
     if (TB.pauseDepuis) {
@@ -1067,49 +1128,83 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
       ecrire(elEtiquette, 'En pause');
     }
   }
-  function terminerTabata() {
-    TB.actif = false; TB.fin = true; app.dataset.tb = 'attente'; occupe();
+  function ecouleWod() { return (TB.pauseDepuis || maintenant()) - TB.debut - TB.decalage; }
+  function tourTermine() {
+    if (!TB.actif || TB.pauseDepuis) return;
+    const p = TB.phases[TB.idx]; if (!p || p.type !== 'amrap') return;
+    TB.tours += 1; ecrire(elSous, 'Tours : ' + TB.tours);
+    clearTimeout(TB.tSignal); elEtiquette.textContent = 'Tour ' + TB.tours; relancer(elEtiquette, 'signal');
+    TB.tSignal = setTimeout(() => { elEtiquette.classList.remove('signal'); if (TB.actif && !TB.pauseDepuis) ecrire(elEtiquette, 'AMRAP'); }, 900);
+    battre(); sons.tic();
+    btnAnneau.classList.add('presse'); setTimeout(relacher, 160); relancer(btnAnneau, 'onde-active');
+  }
+  function actionWod() {
+    if (w() === 'amrap') tourTermine();
+    else if (w() === 'fortime' && TB.actif) {
+      const p = TB.phases[TB.idx]; if (!p || p.type !== 'fortime') return;
+      terminerTabata({ temps: ecouleWod() - p.t0 });
+    }
+  }
+  function terminerTabata(info) {
+    info = info || {};
+    TB.actif = false; app.dataset.tb = 'attente'; occupe();
     poserPhase('effort'); progression(1, true);
-    ecrire(elEtiquette, 'Bravo');
-    afficherMessage('Terminé !'); elChiffres.classList.remove('battement', 'morph'); relancer(elChiffres, 'top');
-    ecrire(elSous, R.tbTours * R.tbBlocs + ' tours accomplis');
+    let titre = 'Terminé !', etiquette = 'Bravo', sous = '';
+    if (w() === 'tabata') sous = R.tbTours * R.tbBlocs + ' tours accomplis';
+    else if (w() === 'emom') sous = R.emomTours + ' intervalles accomplis';
+    else if (w() === 'amrap') sous = TB.tours + (TB.tours > 1 ? ' tours en ' : ' tour en ') + R.amrapDuree + ' min';
+    else if (info.temps !== undefined) { etiquette = 'Ton temps'; titre = fmt(Math.floor(info.temps / 1000)); sous = 'For Time terminé'; }
+    else { etiquette = 'Temps écoulé'; sous = 'Limite de ' + R.ftLimite + ' min atteinte'; }
+    ecrire(elEtiquette, etiquette);
+    afficherMessage(titre); elChiffres.classList.remove('battement', 'morph'); relancer(elChiffres, 'top');
+    ecrire(elSous, sous);
     sons.fin(); setTimeout(() => dire('Terminé !'), 150);
     const r = btnAnneau.getBoundingClientRect();
     eclat.style.setProperty('--cx', (r.left + r.width / 2) + 'px'); eclat.style.setProperty('--cy', (r.top + r.height / 2) + 'px');
     relancer(racine, 'eclair'); setTimeout(() => racine.classList.remove('eclair'), 1900);
     relancer(btnAnneau, 'ondes-top'); setTimeout(() => btnAnneau.classList.remove('ondes-top'), 1800);
     clearTimeout(TB.tFin);
-    TB.tFin = setTimeout(() => { elChiffres.classList.remove('top'); if (!TB.actif) { afficherAttenteTabata(); morph(); } }, 2600);
+    TB.tFin = setTimeout(() => { elChiffres.classList.remove('top'); if (!TB.actif) { afficherAttenteTabata(); morph(); } }, w() === 'tabata' || w() === 'emom' ? 2600 : 4500);
+  }
+  function sousPhase(p) {
+    if (p.type === 'prep') return w() === 'tabata' ? 'Tour 1 / ' + R.tbTours + ' dans un instant' : w() === 'emom' ? 'Intervalle 1 / ' + R.emomTours + ' dans un instant' : 'Départ dans un instant';
+    if (p.type === 'minute') return 'Intervalle ' + p.tour + ' / ' + R.emomTours;
+    if (p.type === 'amrap') return 'Tours : ' + TB.tours;
+    if (p.type === 'fortime') return 'Limite : ' + fmt(R.ftLimite * 60);
+    return 'Tour ' + p.tour + ' / ' + R.tbTours + (R.tbBlocs > 1 ? ' · Bloc ' + p.bloc + ' / ' + R.tbBlocs : '');
   }
   function entrerPhase(p, aLHeure) {
-    const phase = p.type === 'effort' ? 'intense' : p.type === 'prep' ? 'alerte' : 'repos';
-    poserPhase(phase);
+    poserPhase(p.type === 'prep' ? 'alerte' : (p.type === 'repos' || p.type === 'pause') ? 'repos' : 'intense');
     ecrire(elEtiquette, NOMS_TB[p.type]);
-    ecrire(elSous, p.type === 'prep' ? 'Tour 1 / ' + R.tbTours + ' dans un instant'
-      : 'Tour ' + p.tour + ' / ' + R.tbTours + (R.tbBlocs > 1 ? ' · Bloc ' + p.bloc + ' / ' + R.tbBlocs : ''));
+    ecrire(elSous, sousPhase(p));
     if (!aLHeure) return;
-    if (p.type === 'effort') { sons.top(); setTimeout(() => dire('Effort'), 120); relancer(btnAnneau, 'onde-active'); }
+    if (p.type === 'prep') sons.alerte();
     else if (p.type === 'repos' || p.type === 'pause') { sons.repos(); setTimeout(() => dire('Repos'), 200); }
-    else { sons.alerte(); }
+    else { sons.top(); setTimeout(() => dire(p.type === 'effort' ? 'Effort' : 'Top'), 120); relancer(btnAnneau, 'onde-active'); }
     morph();
   }
   function tickTabata() {
     if (!TB.actif) return;
-    const ecoule = (TB.pauseDepuis || maintenant()) - TB.debut - TB.decalage;
-    let i = TB.phases.findIndex((p) => ecoule < p.t0 + p.d * 1000);
+    const ecoule = ecouleWod();
+    const i = TB.phases.findIndex((p) => ecoule < p.t0 + p.d * 1000);
     if (i < 0) { terminerTabata(); return; }
     const p = TB.phases[i];
     if (i !== TB.idx) {
-      const retard = ecoule - p.t0;
-      TB.idx = i; TB.tics = {};
-      entrerPhase(p, retard < 700);
+      TB.idx = i; TB.tics = {}; TB.alerteFaite = false;
+      entrerPhase(p, ecoule - p.t0 < 700);
       if (TB.pauseDepuis) ecrire(elEtiquette, 'En pause');
     }
     const reste = p.t0 + p.d * 1000 - ecoule;
-    if (R.tics && !TB.pauseDepuis) for (const n of [3, 2, 1]) {
-      if (!TB.tics[n] && reste <= n * 1000 && p.d > n) { TB.tics[n] = true; if (reste > n * 1000 - 600) { sons.tic(); battre(); } }
+    if (!TB.pauseDepuis) {
+      // Longues phases (AMRAP, For Time) : alerte 10 s avant la fin, comme pour les repos
+      if ((p.type === 'amrap' || p.type === 'fortime') && !TB.alerteFaite && reste <= 10000) {
+        TB.alerteFaite = true; if (reste > 8500) { sons.alerte(); setTimeout(() => dire(phraseAlerte()), 180); }
+      }
+      if (R.tics) for (const n of [3, 2, 1]) {
+        if (!TB.tics[n] && reste <= n * 1000 && p.d > n) { TB.tics[n] = true; if (reste > n * 1000 - 600) { sons.tic(); battre(); } }
+      }
     }
-    ecrire(elChiffres, fmt(Math.ceil(reste / 1000)));
+    ecrire(elChiffres, p.type === 'fortime' ? fmt(Math.floor((ecoule - p.t0) / 1000)) : fmt(Math.ceil(reste / 1000)));
     progression(reste / (p.d * 1000), false);
   }
   function choisirMode(m, anime) {
@@ -1118,26 +1213,36 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
     const zone = $('#modes'); let choisi = null;
     zone.querySelectorAll('button').forEach((b) => { const oui = b.dataset.v === m; b.setAttribute('aria-checked', String(oui)); if (oui) choisi = b; });
     placerPastille(zone, choisi, anime);
-    btnAnneau.setAttribute('aria-label', m === 'tabata' ? 'Démarrer le Tabata' : 'Série terminée');
-    if (m === 'tabata') afficherAttenteTabata();
-    else { poserPhase('effort'); effacerMessage(); afficherEffort(); }
+    if (m === 'tabata') { afficherAttenteTabata(); majFormats(false); }
+    else { btnAnneau.setAttribute('aria-label', 'Série terminée'); poserPhase('effort'); effacerMessage(); afficherEffort(); }
     morph(); occupe();
   }
   $('#modes').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => choisirMode(b.dataset.v, true)));
   surAppui($('#tb-demarrer'), demarrerTabata);
   surAppui($('#tb-pause'), pauseTabata);
-  $('#tb-arreter').addEventListener('click', () => arreterTabata(false));
+  surAppui($('#tb-action'), actionWod);
+  $('#tb-arreter').addEventListener('click', arreterTabata);
   $('#tb-resume').addEventListener('click', ouvrir);
-  const REGLAGES_TB = [
-    { cle: 'tbEffort', titre: 'Effort', min: 5, max: 180, pas: 5, f: (v) => v + ' s' },
-    { cle: 'tbRepos', titre: 'Repos', min: 5, max: 180, pas: 5, f: (v) => v + ' s' },
-    { cle: 'tbTours', titre: 'Tours', min: 1, max: 30, pas: 1, f: (v) => String(v) },
-    { cle: 'tbBlocs', titre: 'Blocs', min: 1, max: 10, pas: 1, f: (v) => String(v) },
-    { cle: 'tbPause', titre: 'Pause entre blocs', min: 15, max: 300, pas: 15, f: (v) => fmt(v) }
-  ];
+  const REGLAGES_WOD = {
+    tabata: [
+      { cle: 'tbEffort', titre: 'Effort', min: 5, max: 180, pas: 5, f: (v) => v + ' s' },
+      { cle: 'tbRepos', titre: 'Repos', min: 5, max: 180, pas: 5, f: (v) => v + ' s' },
+      { cle: 'tbTours', titre: 'Tours', min: 1, max: 30, pas: 1, f: (v) => String(v) },
+      { cle: 'tbBlocs', titre: 'Blocs', min: 1, max: 10, pas: 1, f: (v) => String(v) },
+      { cle: 'tbPause', titre: 'Pause entre blocs', min: 15, max: 300, pas: 15, f: (v) => fmt(v) }
+    ],
+    emom: [
+      { cle: 'emomIntervalle', titre: 'Intervalle', min: 15, max: 300, pas: 15, f: (v) => fmt(v) },
+      { cle: 'emomTours', titre: 'Nombre d’intervalles', min: 1, max: 60, pas: 1, f: (v) => String(v) }
+    ],
+    amrap: [{ cle: 'amrapDuree', titre: 'Durée', min: 1, max: 60, pas: 1, f: (v) => v + ' min' }],
+    fortime: [{ cle: 'ftLimite', titre: 'Limite de temps', min: 1, max: 90, pas: 1, f: (v) => v + ' min' }]
+  };
   function rendreEditeurTabata() {
+    $('#titre-wod').textContent = 'WOD · ' + FORMATS[w()];
+    $('#note-wod').textContent = NOTES_WOD[w()];
     const ed = $('#editeur-tabata'); ed.innerHTML = '';
-    REGLAGES_TB.forEach((c) => {
+    REGLAGES_WOD[w()].forEach((c) => {
       const ligne = document.createElement('div'); ligne.className = 'ligne';
       ligne.innerHTML = '<span class="ligne-titre"></span><div class="pas"><button class="mini" type="button">−</button><output></output><button class="mini" type="button">+</button></div>';
       ligne.querySelector('.ligne-titre').textContent = c.titre;
@@ -1165,18 +1270,30 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
   /* ---------- Actions principales ---------- */
   // Action déclenchée dès que le doigt touche le bouton (même s'il glisse ensuite) ;
   // le clic qui suit est ignoré, et le clavier (Entrée, Espace) passe toujours par le clic.
+  // L'écran peut changer sous le doigt : le clic qui suit l'appui ne doit pas
+  // atterrir sur le bouton apparu à la même place (ex. « Terminé » → réglages).
+  let appuiSource = null, appuiInstant = 0;
+  document.addEventListener('pointerdown', (e) => { if (!appuiSource || !appuiSource.contains(e.target)) appuiSource = null; }, true);
+  document.addEventListener('click', (e) => {
+    if (appuiSource && performance.now() - appuiInstant < 800 && !appuiSource.contains(e.target)) { e.preventDefault(); e.stopPropagation(); }
+    appuiSource = null;
+  }, true);
   function surAppui(el, action) {
     let dernier = 0;
     el.addEventListener('pointerdown', (e) => {
       if (e.button !== 0 && e.pointerType === 'mouse') return;
-      dernier = performance.now(); action();
+      dernier = performance.now(); appuiSource = el; appuiInstant = dernier; action();
     });
     el.addEventListener('click', () => { if (performance.now() - dernier < 800) return; action(); });
   }
   const relacher = () => btnAnneau.classList.remove('presse');
   ['pointerup', 'pointercancel', 'blur'].forEach((ev) => btnAnneau.addEventListener(ev, relacher));
   function appuiAnneau() {
-    if (R.mode === 'tabata') { if (!TB.actif) { btnAnneau.classList.add('presse'); setTimeout(relacher, 160); relancer(btnAnneau, 'onde-active'); demarrerTabata(); } return; }
+    if (R.mode === 'tabata') {
+      if (!TB.actif) { btnAnneau.classList.add('presse'); setTimeout(relacher, 160); relancer(btnAnneau, 'onde-active'); demarrerTabata(); }
+      else if (w() === 'amrap') tourTermine();
+      return;
+    }
     if (S.etat !== 'effort') return;
     btnAnneau.classList.add('presse'); setTimeout(relacher, 160);
     btnAnneau.classList.remove('onde-active'); void btnAnneau.offsetWidth; btnAnneau.classList.add('onde-active');
@@ -1270,6 +1387,7 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
   const replacer = () => {
     majDurees(false);
     { const z = $('#modes'); placerPastille(z, z.querySelector('[aria-checked="true"]'), false); }
+    if (R.mode === 'tabata') majFormats(false);
     if (feuille.classList.contains('ouvert')) feuille.querySelectorAll('.segment').forEach((sg) => placerPastille(sg, sg.querySelector('[aria-checked="true"]'), false));
   };
   window.addEventListener('resize', replacer);
@@ -1300,7 +1418,7 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
         ], { duration: 1150, fill: 'backwards' });
         setTimeout(() => btnAnneau.classList.remove('sans-halo'), 700);
         $('.fonds').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 900, delay: 200, easing: 'ease-out', fill: 'backwards' });
-        const els = ['.marque', '#modes', '.tete-actions', '#etiquette', '#chiffres', '#sous', '#durees', '#btn-serie', '#btn-nouvel', '#tb-resume', '#tb-demarrer']
+        const els = ['.marque', '#modes', '.tete-actions', '#etiquette', '#chiffres', '#sous', '#durees', '#btn-serie', '#btn-nouvel', '#formats', '#tb-resume', '#tb-demarrer']
           .map((sel) => $(sel)).filter((el) => el && el.offsetParent !== null);
         els.forEach((el, i) => el.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }],
           { duration: 500, delay: 700 + i * 60, easing: 'cubic-bezier(.22,.8,.22,1)', fill: 'backwards' }));
@@ -1319,7 +1437,7 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
       arbre.animate([{ opacity: 0, transform: 'scale(.78)' }, { opacity: 1, transform: 'scale(1)' }],
         { duration: 650, delay: 200, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'backwards' });
       $('.fonds').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 1000, delay: 350, easing: 'ease-out', fill: 'backwards' });
-      const elements = ['.marque', '#modes', '.tete-actions', '#etiquette', '#chiffres', '#sous', '#durees', '#btn-serie', '#btn-nouvel', '#tb-resume', '#tb-demarrer']
+      const elements = ['.marque', '#modes', '.tete-actions', '#etiquette', '#chiffres', '#sous', '#durees', '#btn-serie', '#btn-nouvel', '#formats', '#tb-resume', '#tb-demarrer']
         .map((sel) => $(sel)).filter((el) => el && el.offsetParent !== null);
       elements.forEach((el, i) => el.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }],
         { duration: 500, delay: 950 + i * 60, easing: 'cubic-bezier(.22,.8,.22,1)', fill: 'backwards' }));
@@ -1331,7 +1449,6 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
   setTimeout(() => racine.classList.remove('intro'), 1500);
 })();
 </script>
-
 <script>if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>
 </body>
 </html>
