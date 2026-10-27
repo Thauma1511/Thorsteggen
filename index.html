@@ -848,7 +848,9 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
   function ecrire(el, t) { if (el.textContent !== t) el.textContent = t; }
   function relancer(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
   function battre() { relancer(elChiffres, 'battement'); }
-  function morph() { elChiffres.classList.remove('battement', 'top'); relancer(elChiffres, 'morph'); }
+  // Pas d'effet sur les chiffres pendant l'intro : c'est elle qui les fait apparaître
+  // (sinon, sur iPhone, le chiffre se montre, disparaît puis revient).
+  function morph() { elChiffres.classList.remove('battement', 'top'); if (racine.classList.contains('intro')) { elChiffres.classList.remove('morph'); return; } relancer(elChiffres, 'morph'); }
   function etiquettePhase() { return racine.dataset.phase === 'alerte' ? 'Prépare-toi' : 'Repos'; }
   function signalEtiquette(t) {
     clearTimeout(S.tSignal); elEtiquette.textContent = t; relancer(elEtiquette, 'signal');
