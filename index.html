@@ -172,7 +172,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--argent);outline
   animation:topIn .8s var(--ressort),refletTexte 1.4s ease-out .1s both}
 @keyframes topIn{0%{opacity:0;transform:scale(.55)}45%{opacity:1;transform:scale(1.12)}100%{transform:scale(1)}}
 @keyframes refletTexte{0%{background-position:100% 0}100%{background-position:0 0}}
-:root.intro #app,:root.intro .fonds{visibility:hidden}
+:root.intro #app,:root.intro .fonds,:root.intro .chiffres{visibility:hidden}
 /* Réplique exacte de l'image de lancement iOS : même place, même taille, pour un enchaînement sans saut */
 .depart{display:none;position:fixed;z-index:30;left:50%;top:50%;width:calc(min(100vw,100vh) * .46 * 1180 / 1140);aspect-ratio:1/1;transform:translate(-50%,-50%);pointer-events:none}
 .depart svg{display:block;width:100%;height:100%}
@@ -1398,6 +1398,15 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
   requestAnimationFrame(replacer);
 
   /* ---------- Intro au lancement : le logo se dessine au centre, grossit, puis rejoint sa place ---------- */
+  // Les chiffres (texte en dégradé) ne respectent pas toujours l'opacité « en attente » sur iPhone :
+  // on les cache vraiment jusqu'à leur tour, puis on les fait apparaître.
+  function apparaitre(el, delai) {
+    const kf = [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }];
+    const opt = { duration: 500, easing: 'cubic-bezier(.22,.8,.22,1)' };
+    if (el !== elChiffres) { el.animate(kf, Object.assign({ delay: delai, fill: 'backwards' }, opt)); return; }
+    el.style.visibility = 'hidden';
+    setTimeout(() => { el.style.visibility = ''; el.animate(kf, opt); }, delai);
+  }
   function intro() {
     if (!racine.classList.contains('intro')) return;
     const autonome = racine.classList.contains('autonome');
@@ -1422,8 +1431,7 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
         $('.fonds').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 900, delay: 200, easing: 'ease-out', fill: 'backwards' });
         const els = ['.marque', '#modes', '.tete-actions', '#etiquette', '#chiffres', '#sous', '#durees', '#btn-serie', '#btn-nouvel', '#formats', '#tb-resume', '#tb-demarrer']
           .map((sel) => $(sel)).filter((el) => el && el.offsetParent !== null);
-        els.forEach((el, i) => el.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }],
-          { duration: 500, delay: 700 + i * 60, easing: 'cubic-bezier(.22,.8,.22,1)', fill: 'backwards' }));
+        els.forEach((el, i) => apparaitre(el, 700 + i * 60));
         return;
       }
       const s0 = Math.min(innerWidth, innerHeight) * 0.46 / r.width;
@@ -1441,8 +1449,7 @@ try{var c_=window.__centreEcran(),d_=document.getElementById('depart');d_.style.
       $('.fonds').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 1000, delay: 350, easing: 'ease-out', fill: 'backwards' });
       const elements = ['.marque', '#modes', '.tete-actions', '#etiquette', '#chiffres', '#sous', '#durees', '#btn-serie', '#btn-nouvel', '#formats', '#tb-resume', '#tb-demarrer']
         .map((sel) => $(sel)).filter((el) => el && el.offsetParent !== null);
-      elements.forEach((el, i) => el.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }],
-        { duration: 500, delay: 950 + i * 60, easing: 'cubic-bezier(.22,.8,.22,1)', fill: 'backwards' }));
+      elements.forEach((el, i) => apparaitre(el, 950 + i * 60));
     } catch (e) {}
   }
   const lancerIntro = () => requestAnimationFrame(() => requestAnimationFrame(intro));
